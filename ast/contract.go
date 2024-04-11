@@ -344,13 +344,17 @@ func (c *Contract) ToProto() NodeType {
 		BaseContracts:           make([]*ast_pb.BaseContract, 0),
 	}
 
+	fmt.Printf("Contract %s", c.Name)
 	for _, baseContract := range c.GetBaseContracts() {
 		proto.BaseContracts = append(proto.BaseContracts, baseContract.ToProto())
+		fmt.Printf(", %s", baseContract.BaseName.Name)
 	}
+	fmt.Printf(" {\n")
 
 	for _, node := range c.GetNodes() {
 		proto.Nodes = append(proto.Nodes, node.ToProto().(*v3.TypedStruct))
 	}
+	fmt.Printf("}\n")
 
 	return NewTypedStruct(&proto, "Contract")
 }
@@ -469,4 +473,45 @@ func (c *Contract) Parse(unitCtx *parser.SourceUnitContext, ctx *parser.Contract
 
 	unit.Nodes = append(unit.Nodes, contractNode)
 	unit.Contract = contractNode
+}
+
+func (c *Contract) ToSource() string {
+
+	code := ""
+	code += fmt.Sprintf("contract %s", c.Name)
+	// handle inheritance
+	for i, baseContract := range c.GetBaseContracts() {
+		if i == 0 {
+			code += fmt.Sprintf(" is %s", baseContract.BaseName.Name)
+			continue
+		}
+		code += fmt.Sprintf(", %s", baseContract.BaseName.Name)
+	}
+	code += " {\n"
+
+	for _, node := range c.GetNodes() {
+		code += node.ToSource()
+	}
+	code += "}\n"
+	return code
+}
+
+func (f *EnumDefinition) ToSource() string {
+	return " EnumDefinition"
+}
+
+func (f *ErrorDefinition) ToSource() string {
+	return " ErrorDefinition"
+}
+
+func (f *EventDefinition) ToSource() string {
+	return " EventDefinition"
+}
+
+func (f *Fallback) ToSource() string {
+	return " Fallback"
+}
+
+func (f *Receive) ToSource() string {
+	return " Receive"
 }

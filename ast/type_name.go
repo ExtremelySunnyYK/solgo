@@ -2,8 +2,9 @@ package ast
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
 	"strings"
+
+	"github.com/goccy/go-json"
 
 	"github.com/antlr4-go/antlr/v4"
 	v3 "github.com/cncf/xds/go/xds/type/v3"
@@ -964,4 +965,19 @@ func (td TypeDescription) ToProto() *ast_pb.TypeDescription {
 		TypeString:     td.TypeString,
 		TypeIdentifier: td.TypeIdentifier,
 	}
+}
+
+func (t *TypeName) ToSource() string {
+	if t.ValueType != nil {
+		return fmt.Sprintf("mapping(%s => %s)", t.KeyType.ToSource(), t.ValueType.ToSource())
+	}
+	return t.GetName()
+}
+
+func (td *TypeDescription) ToSource() string {
+	return " TypeDescription"
+}
+
+func (pn *PathNode) ToSource() string {
+	return " PathNode"
 }

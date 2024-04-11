@@ -254,3 +254,24 @@ func parseImportPathsForSourceUnit(
 	b.currentImports = append(b.currentImports, filteredImports...)
 	return filteredImports
 }
+
+// ToSource
+func (i *Import) ToSource() string {
+	code := "import "
+	symbolAliases := strings.Join(i.UnitAliases, ", ")
+	unitAlias := i.UnitAlias
+	path := i.GetFile()
+
+	// TODO: test unitAlias
+	if unitAlias != "" {
+		code += path + " as " + unitAlias
+		// TODO: test symbolAliases
+	} else if symbolAliases != "" {
+		code += "{ " + symbolAliases + " } from " + path
+	} else {
+		code += path
+	}
+
+	code += ";\n"
+	return code
+}

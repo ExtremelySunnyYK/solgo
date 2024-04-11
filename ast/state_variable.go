@@ -18,6 +18,7 @@ type StateVariableDeclaration struct {
 	NodeType        ast_pb.NodeType        `json:"node_type"`         // Type of the node (VARIABLE_DECLARATION for state variable declaration)
 	Src             SrcNode                `json:"src"`               // Source information about the state variable declaration
 	Scope           int64                  `json:"scope"`             // Scope of the state variable declaration
+	Override        bool                   `json:"override"`          // Indicates if the state variable is an override
 	TypeDescription *TypeDescription       `json:"type_description"`  // Type description of the state variable declaration
 	Visibility      ast_pb.Visibility      `json:"visibility"`        // Visibility of the state variable declaration
 	StorageLocation ast_pb.StorageLocation `json:"storage_location"`  // Storage location of the state variable declaration
@@ -207,6 +208,10 @@ func (v *StateVariableDeclaration) Parse(
 		v.Constant = constantCtx != nil
 	}
 
+	if ctx.GetOverrideSpecifierSet() {
+		v.Override = true
+	}
+
 	typeName := NewTypeName(v.ASTBuilder)
 
 	typeName.Parse(unit, nil, v.Id, ctx.GetType_())
@@ -268,6 +273,10 @@ func (v *StateVariableDeclaration) ParseGlobal(
 
 	for _, constantCtx := range ctx.AllConstant() {
 		v.Constant = constantCtx != nil
+	}
+
+	if ctx.GetOverrideSpecifierSet() {
+		v.Override = true
 	}
 
 	typeName := NewTypeName(v.ASTBuilder)
@@ -382,4 +391,35 @@ func (b *ASTBuilder) EnterConstantVariableDeclaration(ctx *parser.ConstantVariab
 func (b *ASTBuilder) EnterVariableDeclaration(ctx *parser.VariableDeclarationContext) {
 	child := NewStateVariableDeclaration(b)
 	child.ParseGlobalVariable(ctx)
+}
+
+// eg: uint256 public number;
+func (v *StateVariableDeclaration) ToSource() string {
+	// k, ok := v.ToProto().(*v3.TypedStruct)
+	// if ok {
+	// 	fmt.Println(k)
+	// }
+
+	code := ""
+	visibility := v.ASTBuilder.VisibilityToCode(v.GetVisibility().String())
+	ident := v.GetName()
+	if v.GetTypeName() != nil {
+		code += v.GetTypeName().ToSource()
+	}
+	if visibility != "" {
+		code += " " + visibility
+	}
+	if v.Override {
+		code += " override"
+	}
+	if ident != "" {
+		code += " " + ident
+	}
+
+	if v.GetInitialValue() != nil {
+		// need to handle tuple expressions
+		code += " = " + v.GetInitialValue().ToSource()
+	}
+	code += ";\n"
+	return code
 }

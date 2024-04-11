@@ -2,9 +2,10 @@ package ast
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
 	"regexp"
 	"strings"
+
+	"github.com/goccy/go-json"
 
 	"github.com/ethereum/go-ethereum/common"
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
@@ -366,6 +367,7 @@ func (f *Function) ToProto() NodeType {
 		Signature:             f.GetSignature(),
 	}
 
+	fmt.Printf("function %s() %s {\n", f.Name, f.Visibility)
 	if f.GetTypeDescription() != nil {
 		proto.TypeDescription = f.GetTypeDescription().ToProto()
 	}
@@ -377,6 +379,7 @@ func (f *Function) ToProto() NodeType {
 	for _, override := range f.GetOverrides() {
 		proto.Overrides = append(proto.Overrides, override.ToProto().(*ast_pb.OverrideSpecifier))
 	}
+	// print out the source code of this function
 
 	return NewTypedStruct(&proto, "Function")
 }
@@ -424,8 +427,8 @@ func (f *Function) Parse(
 
 	// Set function parameters if they exist.
 	params := NewParameterList(f.ASTBuilder)
-	if len(ctx.AllParameterList()) > 0 {
-		params.Parse(unit, f, ctx.AllParameterList()[0])
+	if ctx.GetArguments() != nil {
+		params.Parse(unit, f, ctx.GetArguments())
 	} else {
 		params.Src = f.Src
 		params.Src.ParentIndex = f.Id
@@ -528,8 +531,8 @@ func (f *Function) ParseTypeName(
 
 	// Set function parameters if they exist.
 	params := NewParameterList(f.ASTBuilder)
-	if len(ctx.AllParameterList()) > 0 {
-		params.Parse(unit, f, ctx.AllParameterList()[0])
+	if ctx.GetArguments() != nil {
+		params.Parse(unit, f, ctx.GetArguments())
 	} else {
 		params.Src = f.Src
 		params.Src.ParentIndex = f.Id
@@ -674,4 +677,53 @@ func (f *Function) getVirtualState(ctx *parser.FunctionDefinitionContext) bool {
 	}
 
 	return false
+}
+
+// tosource
+// TODO: alot to improve ehre
+// function sumOfArray(uint256[] memory numbers) external pure returns (uint256) {
+func (f *Function) ToSource() string {
+	code := ""
+	parameters := ""
+	if f.GetParameters() != nil {
+		for i, param := range f.GetParameters().GetParameters() {
+			if i > 0 {
+				parameters += ", "
+			}
+			parameters += param.ToSource()
+		}
+	}
+
+	visibility := ""
+	if f.Visibility != ast_pb.Visibility_V_DEFAULT {
+		visibility = " " + f.VisibilityToCode(f.Visibility.String())
+	}
+
+	virtual := ""
+	if f.Virtual {
+		virtual = " virtual"
+	}
+
+	// override
+
+	stateMutability := ""
+	if f.StateMutability != ast_pb.Mutability_M_DEFAULT && f.StateMutability != ast_pb.Mutability_NONPAYABLE {
+		stateMutability = " " + f.StateMutabilityToCode(f.StateMutability.String())
+	}
+
+	code += "function " + f.Name + "(" + parameters + ")"
+	code += visibility + virtual + stateMutability
+
+	if f.GetReturnParameters() != nil {
+		if f.GetReturnParameters().ToSource() != "" {
+			code += " returns (" + f.GetReturnParameters().ToSource() + ")"
+		}
+	}
+
+	code += " {\n"
+	if f.GetBody() != nil {
+		code += f.GetBody().ToSource()
+	}
+	code += "}\n"
+	return code
 }

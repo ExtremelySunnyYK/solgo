@@ -182,3 +182,10 @@ func (d *Declaration) ParseVariableDeclaration(
 	d.currentVariables = append(d.currentVariables, d)
 
 }
+
+// naive implementation, mising visibility, state mutability, and storage location
+func (f *Declaration) ToSource() string {
+	code := ""
+	code += f.TypeName.ToSource() + " " + f.Name
+	return code
+}

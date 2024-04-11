@@ -379,3 +379,7 @@ func (m *MemberAccessExpression) Parse(
 
 	return m
 }
+
+func (f *MemberAccessExpression) ToSource() string {
+	return f.Expression.ToSource() + "." + f.MemberName
+}

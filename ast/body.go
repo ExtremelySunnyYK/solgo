@@ -413,3 +413,12 @@ func (b *BodyNode) parseStatements(
 		)
 	}
 }
+
+func (b *BodyNode) ToSource() string {
+	code := ""
+	for _, statement := range b.GetStatements() {
+		code += statement.ToSource()
+		code += ";\n"
+	}
+	return code
+}

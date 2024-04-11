@@ -554,3 +554,21 @@ func (f *FunctionCallOption) Parse(
 
 	return f
 }
+
+// ToSource
+func (f *FunctionCallOption) ToSource() string {
+	return " FunctionCallOption"
+}
+
+func (f *FunctionCall) ToSource() string {
+	code := ""
+	code += f.Expression.ToSource() + "("
+	for i, arg := range f.Arguments {
+		code += arg.ToSource()
+		if i != len(f.Arguments)-1 {
+			code += ", "
+		}
+	}
+	code += ")"
+	return code
+}

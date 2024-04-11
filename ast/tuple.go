@@ -256,3 +256,16 @@ func (t *TupleExpression) buildTypeDescription() *TypeDescription {
 		TypeIdentifier: typeIdentifier,
 	}
 }
+
+func (f *TupleExpression) ToSource() string {
+	code := "("
+	for i, component := range f.GetComponents() {
+		if i == 0 {
+			code += component.ToSource()
+			continue
+		}
+		code += ", " + component.ToSource()
+	}
+	code += ")"
+	return code
+}

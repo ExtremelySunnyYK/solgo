@@ -203,3 +203,12 @@ func (f *Conditional) Parse(
 
 	return f
 }
+
+func (f *Conditional) ToSource() string {
+	code := ""
+	cond := f.Expressions[0].ToSource()
+	tBranch := f.Expressions[1].ToSource()
+	fBranch := f.Expressions[2].ToSource()
+	code += cond + " ? " + tBranch + " : " + fBranch
+	return code
+}

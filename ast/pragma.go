@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"fmt"
+
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
 	"github.com/unpackdev/solgo/parser"
 )
@@ -202,4 +204,9 @@ func parsePragmasForSourceUnit(
 	}
 
 	return filteredPragmas
+}
+
+// find a way to hoist pragma to the top
+func (f *Pragma) ToSource() string {
+	return fmt.Sprintf("%s\n", f.Text)
 }

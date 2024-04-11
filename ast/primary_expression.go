@@ -673,3 +673,11 @@ func (p *PrimaryExpression) buildFunctionArgumentTypeDescription() *TypeDescript
 		TypeIdentifier: typeIdentifier,
 	}
 }
+
+// find out if this is the end of the chain
+func (p *PrimaryExpression) ToSource() string {
+	if p.GetKind() == ast_pb.NodeType_NUMBER {
+		return p.Value
+	}
+	return p.Name
+}

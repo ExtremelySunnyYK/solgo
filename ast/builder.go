@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"context"
+
 	"github.com/goccy/go-json"
 
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
@@ -109,6 +110,56 @@ func (b *ASTBuilder) ResolveReferences() []error {
 	b.GarbageCollect()
 
 	return nil
+}
+
+// converts visibility to code string
+func (b *ASTBuilder) VisibilityToCode(visibility string) string {
+	switch visibility {
+	case "PUBLIC":
+		return "public"
+	case "INTERNAL":
+		return "internal"
+	case "EXTERNAL":
+		return "external"
+	case "PRIVATE":
+		return "private"
+	default:
+		return "not recognised visibility: " + visibility
+	}
+}
+
+func (b *ASTBuilder) StateMutabilityToCode(stateMutability string) string {
+	switch stateMutability {
+	case "MUTABLE":
+		return "mutable"
+	case "IMMUTABLE":
+		return "immutable"
+	case "PURE":
+		return "pure"
+	case "VIEW":
+		return "view"
+	case "PAYABLE":
+		return "payable"
+	case "NONPAYABLE":
+		return "nonpayable"
+	default:
+		return "not recognised state mutability: " + stateMutability
+	}
+}
+
+func (b *ASTBuilder) StorageLocationToCode(storageLocation string) string {
+	switch storageLocation {
+	case "DEFAULT":
+		return ""
+	case "MEMORY":
+		return "memory"
+	case "STORAGE":
+		return "storage"
+	case "CALLDATA":
+		return "calldata"
+	default:
+		return "not recognised storage location: " + storageLocation
+	}
 }
 
 // ImportFromJSON imports the AST from a JSON byte array.

@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"fmt"
+
 	"github.com/goccy/go-json"
 
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
@@ -236,6 +238,7 @@ func (p *Parameter) ToProto() NodeType {
 	}
 
 	if p.GetTypeName() != nil {
+		fmt.Printf("%s %s", p.GetTypeName().GetName(), p.GetName())
 		toReturn.TypeName = p.GetTypeName().ToProto().(*ast_pb.TypeName)
 	}
 
@@ -438,5 +441,24 @@ func (p *Parameter) getStorageLocationFromCtx(ctx *parser.ParameterDeclarationCo
 		}
 	}
 
-	return ast_pb.StorageLocation_MEMORY
+	return ast_pb.StorageLocation_DEFAULT
+}
+
+func (p *Parameter) ToSource() string {
+	typeName := p.TypeName.ToSource()
+	storage := ""
+	if p.StorageLocation != ast_pb.StorageLocation_ST_UNKNOWN {
+		storage = p.StorageLocationToCode(p.StorageLocation.String())
+	}
+	ident := p.GetName()
+	code := ""
+	code += typeName
+	if storage != "" {
+		code += " " + storage
+	}
+	if ident != "" {
+		code += " " + ident
+	}
+
+	return code
 }

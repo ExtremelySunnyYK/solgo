@@ -278,3 +278,22 @@ func (u *UnaryPrefix) Parse(
 
 	return u
 }
+
+func (f *UnaryPrefix) ToSource() string {
+	operator := ""
+	switch f.Operator {
+	case ast_pb.Operator_INCREMENT:
+		operator = "++"
+	case ast_pb.Operator_DECREMENT:
+		operator = "--"
+	case ast_pb.Operator_NOT:
+		operator = "!"
+	case ast_pb.Operator_BIT_NOT:
+		operator = "~"
+	case ast_pb.Operator_SUBTRACT:
+		operator = "-"
+	default:
+		panic("unknown unary operator")
+	}
+	return operator + f.Expression.ToSource()
+}

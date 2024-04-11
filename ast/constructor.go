@@ -340,3 +340,23 @@ func (c *Constructor) getVisibilityFromCtx(ctx *parser.ConstructorDefinitionCont
 
 	return ast_pb.Visibility_INTERNAL
 }
+
+func (f *Constructor) ToSource() string {
+	code := "constructor("
+	code += f.GetParameters().ToSource()
+	code += ")"
+	// payable and visiibility
+	stateMutability := f.StateMutabilityToCode(f.StateMutability.String())
+	visibility := f.VisibilityToCode(f.Visibility.String())
+	if visibility != "" {
+		code += " " + visibility
+	}
+	if stateMutability != "" {
+		code += " " + stateMutability
+	}
+	code += " {\n"
+	code += f.GetBody().ToSource()
+	code += "}\n"
+
+	return code
+}

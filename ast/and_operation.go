@@ -180,3 +180,15 @@ func (f *AndOperation) Parse(
 
 	return f
 }
+
+func (f *AndOperation) ToSource() string {
+	code := ""
+	for i, exp := range f.GetExpressions() {
+		code += exp.ToSource()
+		if i < len(f.GetExpressions())-1 {
+			code += " && "
+		}
+	}
+
+	return code
+}
